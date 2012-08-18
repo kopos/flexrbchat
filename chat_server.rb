@@ -3,7 +3,7 @@ require 'socket'
 
 MSGS = {"init" => "Server started. Waiting for connections...",
         "welcome" => "Welcome! type EXIT to quit",
-        "byebye" 	=> "Disconnected from server"}
+        "byebye" => "Disconnected from server"}
 
 EOF  = "\000"
 HOST = "localhost"
