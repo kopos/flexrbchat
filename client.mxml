@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init()">
+
+	<mx:Script>
+		<![CDATA[
+			import flash.display.Sprite;
+		
+			import flash.net.XMLSocket;
+			import flash.events.Event;
+			import flash.events.DataEvent;
+			import flash.events.IOErrorEvent;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+	
+			public var socket:XMLSocket = new XMLSocket();
+			private var host:String     = "localhost";
+			private var port:int        = 9999;
+	
+			public function init():void	{
+				socket.connect(host, port);
+	
+				socket.addEventListener(DataEvent.DATA, onData);
+				socket.addEventListener(Event.CONNECT, onConnect);
+				socket.addEventListener(Event.CLOSE, onClose);
+				socket.addEventListener(IOErrorEvent.IO_ERROR, onEvent);
+			}
+			
+			private function onConnect(event:Event):void	{
+				board.htmlText += "<i>Client: Connected to server</i>" + "<br/>";
+			}
+			
+			private function ReconnectHandler(event:CloseEvent):void	{
+				if (event.detail == Alert.YES)
+					init();
+			}
+
+			private function onClose(event:Event):void	{
+				board.htmlText += "<i>Disconnected from server</i>" + "<br/>";
+				Alert.show("Reconnect to the chat?", "Reconnect?", (Alert.YES | Alert.NO), this, ReconnectHandler);
+			}
+
+			private function onEvent(event:Event):void {
+				board.htmlText += "Error" + "<br/>";
+				trace(event);
+			}
+	
+			private function onData(event:DataEvent):void {
+				board.htmlText += event.text;
+			}
+			
+			private function sendMesg():void	{
+				socket.send(username.text+ ': <font color="#' + cp.selectedColor.toString(16) + '">' + mesg.text + "</font>\n");
+				mesg.text = "";
+			}
+
+		]]>
+	</mx:Script>
+
+	<mx:Style>
+		.marginstyle {
+			paddingTop:12; 
+			paddingBottom:12; 
+			paddingLeft: 12; 
+			paddingRight: 12;
+		}
+
+		.spacestyle {
+			paddingTop:2; 
+			paddingBottom:2; 
+			paddingLeft: 2; 
+			paddingRight: 2;
+		}
+	</mx:Style>
+
+	<mx:Panel title="chatterbox" styleName="marginstyle">
+		<mx:TextArea editable="false" id="board" text="" height="400" width="600" color="#0000FF" styleName="spacestyle"/>
+		<mx:HBox>
+			<mx:TextArea id="username" text="guest" height="20" width="50%"/>
+			<mx:ColorPicker id="cp" height="20" width="20"/>    
+		</mx:HBox>
+		<mx:HBox>
+			<mx:TextArea id="mesg" height="50" width="500" styleName="spacestyle"/>
+			<mx:Button label="Send" click="sendMesg()"/>	
+		</mx:HBox>
+	</mx:Panel>
+</mx:Application>
